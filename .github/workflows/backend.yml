@@ -5,7 +5,7 @@ permissions:
   contents: read
 jobs:
   backend:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -36,4 +36,4 @@ jobs:
           process.exit(result.status ?? 1);
           JS
       - name: Deploy song matching
-        run: supabase functions deploy song-api --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt
+        run: supabase functions deploy song-api --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt --use-api
