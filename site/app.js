@@ -49,7 +49,7 @@ function card(song){
 function render(){
  const query=$('search').value.trim().toLowerCase();const visible=songs.filter(s=>(s.title+' '+s.artist+' '+s.added_by).toLowerCase().includes(query));
  $('songs').replaceChildren(...visible.map(card));$('count').textContent=songs.length;
- if(!visible.length){const el=document.createElement('div');el.className='empty';const title=document.createElement('strong');title.textContent=query?'No songs found':'The first song is yours.';const p=document.createElement('span');p.textContent=query?'Try another title or artist.':'Add something you’ve had on repeat.';el.append(title,p);$('songs').append(el);}
+ if(!visible.length){const el=document.createElement('div');el.className='empty';el.textContent=query?'No songs found.':'No songs yet.';$('songs').append(el);}
 }
 async function load(){
  if(!ready){status('list-status','Preview mode — connect the site to enable the shared collection.');render();return;}
@@ -59,7 +59,7 @@ async function load(){
 }
 async function add(song,button){
  button.disabled=true;status('form-status','Adding your song…');
- try{await api({action:'add',song,added_by:$('name').value.trim() || 'Anonymous'});status('form-status','Into the pot it goes ♡','success');candidate=null;$('preview').hidden=true;$('lookup-form').reset();$('manual-form').reset();$('manual').open=false;await load();}
+ try{await api({action:'add',song,added_by:$('name').value.trim() || 'Anonymous'});status('form-status','Song added.','success');candidate=null;$('preview').hidden=true;$('lookup-form').reset();$('manual-form').reset();$('manual').open=false;await load();}
  catch(e){status('form-status',e.message,'error');}finally{button.disabled=false;}
 }
 $('lookup-form').addEventListener('submit',async e=>{
