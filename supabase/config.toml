@@ -1,0 +1,5 @@
+project_id = "songboard"
+
+[functions.song-api]
+verify_jwt = false
+# The handler validates the user token against Auth before any operation.

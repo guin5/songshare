@@ -1,0 +1,42 @@
+name: Publish website
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/pages.yml', 'tests/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm test
+      - name: Write public configuration
+        env:
+          URL: ${{ vars.SUPABASE_URL }}
+          KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          CAPTCHA: ${{ vars.TURNSTILE_SITE_KEY }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          if (!process.env.URL || !process.env.KEY) throw new Error('Add SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY repository variables first.');
+          fs.writeFileSync('site/config.js', 'window.SONGBOARD_CONFIG = '+JSON.stringify({supabaseUrl:process.env.URL,supabaseKey:process.env.KEY,turnstileSiteKey:process.env.CAPTCHA || ''})+';');
+          JS
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4
+        id: deployment
