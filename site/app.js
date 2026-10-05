@@ -4,8 +4,9 @@ const ready=/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl || '') &
 let songs=[],candidate=null,session=null,authPromise=null,captchaToken='',captchaWidget;
 const status=(id,msg,kind='')=>{ $(id).textContent=msg;$(id).className=`status ${kind}`; };
 async function request(path,options={}) {
+ const {timeoutMs=20000,...fetchOptions}=options;
  const headers={apikey:cfg.supabaseKey,'Content-Type':'application/json',...options.headers};
- const res=await fetch(cfg.supabaseUrl+path,{...options,headers,signal:AbortSignal.timeout(20000)});
+ const res=await fetch(cfg.supabaseUrl+path,{...fetchOptions,headers,signal:AbortSignal.timeout(timeoutMs)});
  const data=await res.json().catch(()=>({}));
  if(!res.ok) throw new Error(data.error_description || data.message || data.error || 'Request failed. Please try again.');
  return data;
@@ -29,7 +30,7 @@ async function auth(){
 }
 async function api(body){
  if(!ready)throw new Error('Song submissions will work once the site is connected. See the included setup guide.');
- const s=await auth();return request('/functions/v1/song-api',{method:'POST',headers:{Authorization:`Bearer ${s.access_token}`},body:JSON.stringify(body)});
+ const s=await auth();return request('/functions/v1/song-api',{method:'POST',headers:{Authorization:`Bearer ${s.access_token}`},body:JSON.stringify(body),timeoutMs:body.action==='resolve'?60000:20000});
 }
 function card(song){
  const article=document.createElement('article');article.className='song';
