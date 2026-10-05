@@ -59,9 +59,9 @@ Add a song from one browser and view the site in another. It should appear immed
 
 Anonymous sign-ins can be abused by creating new sessions. For a public site, enable Cloudflare Turnstile in Supabase's Auth bot-protection settings, create a Turnstile widget for your GitHub Pages hostname, put its secret key **in Supabase**, and put its public site key in the `TURNSTILE_SITE_KEY` GitHub variable. Run Publish website again. The frontend already includes the widget. For initial private testing, verification is optional.
 
-## Admin removal
+## Shared trash
 
-In Supabase's Table Editor, open `songs` and delete an unwanted row. Visitors cannot edit or delete songs. Display names are self-reported, not verified identities.
+Each song has a Delete button that moves it into shared Trash. Any visitor can restore it before its 30-day retention ends. The database checks hourly and permanently removes songs that have spent 30 days in trash, even when no one has the site open. Trashed links remain reserved until cleanup; restore the existing song rather than adding a duplicate. Display names are G, P, or T and are self-reported, not verified identities.
 
 ## Preview locally
 
