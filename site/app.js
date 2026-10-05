@@ -39,7 +39,7 @@ function card(song){
  else{art=document.createElement('div');art.textContent='♫';}art.className='art';article.append(art);
  const info=document.createElement('div');info.className='song-info';
  const title=document.createElement('h3');title.textContent=song.title;const artist=document.createElement('p');artist.className='artist';artist.textContent=song.artist;info.append(title,artist);
- if(song.added_by){const by=document.createElement('p');by.className='byline';by.textContent=`Added by ${song.added_by}`;info.append(by);}
+ if(song.added_by){const by=document.createElement('p');by.className='byline';by.textContent=`from ${song.added_by}`;info.append(by);}
  const links=document.createElement('div');links.className='links';
  for(const [field,platform,label] of [['spotify_url','spotify','Spotify'],['apple_url','apple','Apple Music']]){
   const url=musicUrl(song[field],platform);if(!url)continue;
@@ -59,7 +59,7 @@ async function load(){
 }
 async function add(song,button){
  button.disabled=true;status('form-status','Adding your song…');
- try{await api({action:'add',song,added_by:$('name').value.trim() || 'Anonymous'});status('form-status','Added to the rotation.','success');candidate=null;$('preview').hidden=true;$('lookup-form').reset();$('manual-form').reset();$('manual').open=false;await load();}
+ try{await api({action:'add',song,added_by:$('name').value.trim() || 'Anonymous'});status('form-status','Into the pot it goes ♡','success');candidate=null;$('preview').hidden=true;$('lookup-form').reset();$('manual-form').reset();$('manual').open=false;await load();}
  catch(e){status('form-status',e.message,'error');}finally{button.disabled=false;}
 }
 $('lookup-form').addEventListener('submit',async e=>{
@@ -76,7 +76,7 @@ $('manual-form').addEventListener('submit',e=>{
 });
 $('search').addEventListener('input',render);$('refresh').addEventListener('click',load);
 if(ready && cfg.turnstileSiteKey){
- window.onCaptchaLoaded=()=>{captchaWidget=window.turnstile.render('#captcha',{sitekey:cfg.turnstileSiteKey,theme:'dark',callback:t=>{captchaToken=t;},'expired-callback':()=>{captchaToken='';}});};
+ window.onCaptchaLoaded=()=>{captchaWidget=window.turnstile.render('#captcha',{sitekey:cfg.turnstileSiteKey,theme:'light',callback:t=>{captchaToken=t;},'expired-callback':()=>{captchaToken='';}});};
  const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onCaptchaLoaded&render=explicit';script.async=true;script.onerror=()=>status('form-status','Verification could not load. Refresh to try again.','error');document.head.append(script);
 }
 load();setInterval(()=>{if(ready&&!document.hidden)load();},30000);
