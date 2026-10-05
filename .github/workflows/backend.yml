@@ -21,12 +21,14 @@ jobs:
           node-version: '24'
       - name: Create tables and permissions
         run: |
+          curl --fail --silent --show-error https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt --output "$RUNNER_TEMP/supabase-ca.crt"
           node --input-type=module <<'JS'
           import { spawnSync } from 'node:child_process';
           const { SUPABASE_PROJECT_ID: ref, SUPABASE_DB_PASSWORD: password, SUPABASE_POOLER_HOST: host } = process.env;
           if (!ref || !password || !host) throw new Error('Missing database configuration.');
           const encodedPassword = encodeURIComponent(password);
-          const databaseUrl = `postgresql://postgres.${ref}:${encodedPassword}@${host}:5432/postgres?sslmode=verify-full`;
+          const certificate = encodeURIComponent(`${process.env.RUNNER_TEMP}/supabase-ca.crt`);
+          const databaseUrl = `postgresql://postgres.${ref}:${encodedPassword}@${host}:5432/postgres?sslmode=verify-full&sslrootcert=${certificate}`;
           console.log(`::add-mask::${encodedPassword}`);
           console.log(`::add-mask::${databaseUrl}`);
           const result = spawnSync('supabase', ['db', 'push', '--db-url', databaseUrl], { stdio: 'inherit' });
