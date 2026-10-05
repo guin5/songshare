@@ -4,7 +4,7 @@ A responsive shared song collection for GitHub Pages. Visitors paste a Spotify o
 
 ## What you need to do
 
-The code is ready; it is not connected to a live database yet. You need your own GitHub repository **and a Supabase project**. This package cannot create accounts or provision resources without access to them. Use a new Supabase project for this app.
+The code supports the deployed Songboard site and can also be configured for a new project. You need your own GitHub repository **and a Supabase project**. This package cannot create accounts or provision resources without access to them. Use a new Supabase project for this app.
 
 ### 1. Create the repository and upload the files
 
@@ -41,11 +41,15 @@ Under **Secrets**, create:
 
 Do not paste these two secrets into website files or chat.
 
-### 4. Run backend setup
+### 4. Configure automatic matching
+
+Create a MusicLink account at https://musiclink.one and an API key. In Supabase, open **Edge Functions → Secrets** and save the key as `MUSICLINK_API_KEY`. Keep it out of GitHub Pages and public source files. Visitors do not need MusicLink accounts. The free plan allows 300 lookups per month and requires the MusicLink attribution shown in the website footer. A first lookup can take 10–15 seconds. Provider documentation: https://musiclink.one/docs/llm.md.
+
+### 5. Run backend setup
 
 In **Actions**, choose **Set up shared database → Run workflow**. It creates the tables, access rules, limits, and song-matching function. Wait for it to finish successfully.
 
-### 5. Publish
+### 6. Publish
 
 In **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. In Actions, run **Publish website**. The workflow links to your live site, usually `https://YOURNAME.github.io/REPOSITORY/`.
 
@@ -68,7 +72,7 @@ Run `npm run preview`, then open http://localhost:8000. Without configuration, t
 - Plain HTML/CSS/JavaScript; relative paths work with GitHub Pages project URLs. No frontend build or package install.
 - Supabase REST/Auth APIs; sessions remain on the visitor's browser. Only public fields can be read; user identifiers and lookup events are private.
 - The function authenticates each request through Supabase Auth. Gateway JWT verification is intentionally disabled because verification is done inside the handler.
-- Songlink/Odesli matching uses its public v1-alpha.1 endpoint and US availability. This is an external dependency; matching may fail, miss a version, or change. Manual entry remains available. Not every song exists on both services. Spotify links must be full `open.spotify.com/track/...` links; shortened links, albums, and playlists are rejected. Apple album share links must include the song's `?i=` parameter.
+- MusicLink matching uses its authenticated v2 resolve endpoint. Countryless Apple Music results use the US storefront. This is an external dependency; matching may fail, miss a version, or change. Manual entry remains available. Not every song exists on both services. Spotify links must be full `open.spotify.com/track/...` links; shortened links, albums, and playlists are rejected. Apple album share links must include the song's `?i=` parameter.
 - Database constraints and transactional limits prevent exact-link duplicates and limit each anonymous identity to 10 submissions per hour. Matching is limited to 20 requests per identity per 10 minutes and 8 globally per minute. These limits are not a complete defense against determined abuse; use verification for public sharing.
 - Automatic refresh and search display up to the newest 1,000 songs. Artwork is loaded from the supplied HTTPS artwork host. Entries are text, never interpreted as HTML.
 - Manual metadata is supplied by visitors and may be inaccurate. Automatic matches are shown for confirmation; no promise of exact recording/version matching.
@@ -77,6 +81,6 @@ Run `npm run preview`, then open http://localhost:8000. Without configuration, t
 
 ## Validation
 
-`npm test` checks song URL validation, canonicalization, supported-service matching, album rejection, and identical browser/server validation. Live database migrations and external matching need testing after your project is connected. Source documentation: https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages, https://supabase.com/docs/guides/auth/auth-anonymous, https://supabase.com/docs/guides/database/postgres/row-level-security, https://github.com/songlink/docs.
+`npm test` checks song URL validation, canonicalization, supported-service matching, album rejection, and identical browser/server validation. Live database migrations and external matching need testing after your project is connected. Source documentation: https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages, https://supabase.com/docs/guides/auth/auth-anonymous, https://supabase.com/docs/guides/database/postgres/row-level-security, https://musiclink.one/docs/llm.md.
 
-Browser visual QA could not be run in the build environment because Chromium was unavailable and its download was blocked. The source checks passed; review desktop/mobile appearance after publishing.
+Live backend and browser checks should be repeated after changing project configuration or the matching provider.
