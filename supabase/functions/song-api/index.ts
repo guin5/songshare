@@ -21,7 +21,12 @@ Deno.serve(async req=>{
   if(body.action==='resolve'){
    const url=musicUrl(body.url);if(!url)return response({error:'Use a Spotify track or Apple Music song link.'},400);
    await rpc('allow_song_lookup',{});
-   const upstream=await fetch('https://api.song.link/v1-alpha.1/links?'+new URLSearchParams({url,userCountry:'US'}),{signal:AbortSignal.timeout(15000)});
+   const matchingKey=Deno.env.get('MUSICLINK_API_KEY');
+   if(!matchingKey)throw new Error('Automatic song matching is not configured yet.');
+   const upstream=await fetch('https://api.musiclink.one/v2/resolve?'+new URLSearchParams({q:url}),{headers:{Authorization:`Bearer ${matchingKey}`},signal:AbortSignal.timeout(45000)});
+   if(upstream.status===429)throw new Error(upstream.headers.has('Retry-After')?'Song matching is busy. Please try again shortly.':'The automatic matching allowance is used up for this month.');
+   if(upstream.status===404)throw new Error('No matching song was found.');
+   if(upstream.status===401)throw new Error('Automatic matching needs the site owner to check its API key.');
    if(!upstream.ok)throw new Error('Song matching is temporarily unavailable.');
    return response(matchedSong(await upstream.json(),url));
   }
